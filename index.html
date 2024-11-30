@@ -1,0 +1,227 @@
+<!DOCTYPE>
+<html lang="en">
+<meta charset="utf-8" />
+<head>
+  <meta name="viewport" content="device-width, initial-scale=1.0" />
+  
+  <style>
+    *{ box-sizing: border-box; margin:0; padding:0; user-select:none;}
+    header{padding:0 2rem;}
+    h2{margin:1.5rem 0; color:#fff;}
+    h3{ text-align: center; margin: 1.5rem 0 0.5rem 0;}
+    h1{font-size: 45px; font-weight:bold;}
+    small{font-size:10px; color:#777;}
+    main{ padding: 1rem 2rem; display: grid; grid-template-columns: repeat(4, 1fr); gap:0.5rem;}
+    .chars{ background: #eeeeee99; border-radius: 10px; padding: 0.5rem 0.4rem; font-weight:bold; font-size:20px;}
+    .back{font-size:25px;}
+    article{ padding:0 2rem;}
+    article p{font-size:13px; color:#777; margin:0.5rem 0;}
+    .btn{border:none; padding:0.5rem 1rem; background:#333;border-radius:20px; color:#fff; font-size:13px;}
+    header .btn{margin: 1rem 0;}
+    .bal, .sub-bal, .inp, .ctrl{width:90%; height:100px; padding:1rem 1rem; background:#333; border-radius:20px; margin:0 auto;}
+    .sub-bal{ margin: 2rem auto; background:none;}
+    .inp, .ctrl{background:none; border:1px solid #dddddd; height:60px; overflow:scroll; margin:0 auto 2rem auto;}
+    .ctrl{height:80px; padding:0.5rem 0.5rem; border-radius:30px;}
+    .ctrl button{height:100%; border:none; background:#333; color:#fff; font-size:20px; font-weight:bold;}
+    #picker{width:100%; border-radius:20px}
+    #submit{width:70%; border-radius:20px 0 0 20px; color:dodgerblue;}
+    #cancel{width:25%; border-radius:0 20px 20px 0; color:firebrick;}
+    .dot{border-radius: 20px 0 0 20px; width:100%;}
+    .dash{border-radius: 0 20px 20px 0; width:100%;}
+    /* utils classes */
+    .flex{ display:flex; justify-content:center; align-items:center;}
+    .flex-sp{ display:flex; justify-content:space-between; align-items:center;}
+    .active:active{opacity:0.1;}
+    .no-border{border:none; height: 60px;}
+  </style>
+  
+  <script>
+    window.addEventListener("DOMContentLoaded", app);
+    const qSelecor = document.querySelector.bind(document);
+    const qSelAll =document.querySelectorAll.bind(document);
+    
+    
+    const game = {
+      chars: [
+        {char:"A", symbol:".-"},
+        {char:"B", symbol:"-..."},
+        {char:"C", symbol:"-.-."},
+        {char:"D", symbol:"-.."},
+        {char:"E", symbol:"."},
+        {char:"F", symbol:"..-."},
+        {char:"G", symbol:"--."},
+        {char:"H", symbol:"...."},
+        {char:"I", symbol:".."},
+        {char:"J", symbol:".---"},
+        {char:"K", symbol:"-.-"},
+        {char:"L", symbol:".-.."},
+        {char:"M", symbol:"--"},
+        {char:"N", symbol:"-."},
+        {char:"O", symbol:"---"},
+        {char:"P", symbol:".--."},
+        {char:"Q", symbol:"--.-"},
+        {char:"R", symbol:".-."},
+        {char:"S", symbol:"..."},
+        {char:"T", symbol:"-"},
+        {char:"U", symbol:"..-"},
+        {char:"V", symbol:"...-"},
+        {char:"W", symbol:".--"},
+        {char:"X", symbol:"-..-"},
+        {char:"Y", symbol:"-.--"},
+        {char:"Z", symbol:"--.."},
+        {char:"0", symbol:"-----"},
+        {char:"1", symbol:".----"},
+        {char:"2", symbol:"..---"},
+        {char:"3", symbol:"...--"},
+        {char:"4", symbol:"....-"},
+        {char:"5", symbol:"....."},
+        {char:"6", symbol:"-...."},
+        {char:"7", symbol:"--..."},
+        {char:"8", symbol:"---.."},
+        {char:"9", symbol:"----."},
+      ],
+      keywords: [
+        "AB","BITCOIN","ASIKOIN","ETHERUM","SHIBA"
+      ],
+      playID:0,
+      bal:0,
+      isTutsOpen: false,
+      help: [
+        "Enter the symbol to match each character in the lucky word.",
+        "Click the button (.) to enter a period character.",
+        "Click the button (-) to enter a hyphen character.",
+        "Click the (x) button do delete the last character entered.",
+        "Once done, click the submit button to validate your entry."
+      ],
+    }
+    
+    
+    function tutorial(){
+      return `<section>
+        <header class="flex-sp">
+          <h1 class="menu back active">&larr;</h1>
+          <h3>TUTORIALS</h3>
+          <p></p>
+        </header>
+        <main>
+          ${game.chars.map(({char, symbol})=>`<div class="chars">
+            ${char}: ${symbol}
+          </div>`).join("")}
+        </main>
+        <article>
+          <h3>How to play</h3>
+          <div>
+           ${game.help.map((step, i)=>`<p>
+             ${i+1}. ${step}
+           </p>`).join("")}
+          </div>
+        </article>
+      </section>`
+    }
+    
+    function home(){
+      return `<section id="home">
+        <header class="flex-sp">
+          <p></p>
+          <p></p>
+          <button class="btn active menu">Tutorial</button>
+        </header>
+        <div class="bal">
+          <h2>${game.bal > 0 ? game.bal : "0.00"}</h2>
+        </div>
+        <div class="sub-bal flex">
+          <article>
+            <h1>${game.keywords[game.playID]}</h1>
+            <small>Lucky word</small>
+          </article>
+        </div>
+        <div class="inp flex" style="justify-content:flex-start;">
+          <p class"fade" id="fade" style="color:#555;font-size:35px; font-weight:bold;">
+          </p>
+        </div>
+        <div class="ctrl flex-sp">
+          <button id="." class="active dot">
+            Press here (.)
+          </button>
+          <button id="-" class="active dash">
+            Press here (-)
+          </button>
+        </div>
+        
+        <div class="ctrl flex-sp no-border">
+          <button id="submit" class="active">
+            Submit
+          </button>
+          <button id="cancel" class="active">
+            &times;
+          </button>
+        </div>
+      </section>`
+    }
+    
+    function checker(str1, str2){
+      if(!str1 || !str2){
+        alert("please enter symbols");
+      }else{
+        str1 = str1.split('').map(el=>game.chars.find(x=>x.char===el).symbol).join('');
+        
+        if(str1 === str2){
+          game.bal += 10;
+          game.playID > game.keywords.length ? 0 : game.playID += 1;
+          app();
+        }else{
+          alert("failed! try again")
+        }
+      }
+    }
+    
+    function app(){
+      
+      qSelecor("#root").innerHTML = (
+        game.isTutsOpen ? tutorial() : home()
+      );
+      
+      
+      const [layout, fade, btn] = [
+        qSelecor("#home"), 
+        qSelecor("#fade"),
+        qSelecor(".menu")
+      ];
+      
+      btn.onclick = function(){
+        game["isTutsOpen"] = !game.isTutsOpen;
+        app();
+      }
+      
+      layout.onclick = function(evt){
+        if(evt.target.tagName === "BUTTON"){
+          
+          switch(evt.target.id){
+            default: {
+              fade.innerText+=evt.target.id;
+            }
+            break;
+            
+            case "cancel": {
+              fade.innerText = fade.innerText.slice(0, fade.innerText.length - 1);
+            }
+            break;
+            
+            case "submit": {
+              checker(game.keywords[game.playID], fade.innerText)
+              fade.innerText = "";
+            }
+          }
+        }
+      }
+      
+      
+      
+    }
+  </script>
+  <title>Game | Tele</title>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>
